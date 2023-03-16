@@ -1,7 +1,7 @@
 # Beat-Bot
 ##
-pip install youtube-dl
+# pip install youtube-dl
 ##
-pip install youtube_search
+# pip install youtube_search
 ##
-pip install discord
+# pip install discord
