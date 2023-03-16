@@ -203,4 +203,4 @@ async def on_message(message):
         return
     await handle_command_prefix(message)
 
-client.run('MTA4NDY4OTg5NjcyNTMwMzMzNw.GNxbqn.I8J1gnRmIHPGWV959srRRJd_Y0Ilihl0PULGW8')
+client.run('INSERT TOKEN')
