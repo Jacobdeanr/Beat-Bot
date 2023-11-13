@@ -69,4 +69,4 @@ async def on_voice_state_update(member, before, after):
         voice_client = discord.utils.get(client.voice_clients, guild=guild_id)
         BotCommands.disconnect_command(voice_client,guild_id)
 
-client.run('MTA4NDY4OTg5NjcyNTMwMzMzNw.GexgA9.sYGo_ZLFU0M7GvRi4wNbbgxGQUu6pgErntfOVM')
+client.run('')
