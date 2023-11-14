@@ -40,7 +40,6 @@ async def handle_command(message):
     """
     content = message.content
     text = content.lower()
-    voice_client = message.guild.voice_client
 
     # Command-function mapping
     commands = {
