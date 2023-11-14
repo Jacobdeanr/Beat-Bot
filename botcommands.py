@@ -184,7 +184,6 @@ class BotCommands:
     async def play_next(voice_client, guild_id):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.play_next()')
         next_song_queue = await QueueControl.retrieve(guild_id)
-        print(f'\tnext song queue = {next_song_queue}')
 
         if next_song_queue and not voice_client.is_playing():
             next_song_path = await QueueControl.remove_song(guild_id)
@@ -193,6 +192,7 @@ class BotCommands:
                 BotCommands.play_audio(voice_client, guild_id, next_song_path)
         else:
             print("\tQueue is empty. No song to play next.")
+        await voice_client.disconnect()
 
     def extract_song_id(file_path):
         base_name = os.path.basename(file_path)
