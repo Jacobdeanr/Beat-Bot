@@ -45,12 +45,12 @@ async def handle_command(message):
     # Command-function mapping
     commands = {
         COMMAND_PLAY: lambda: BotCommands.play_command(message),
-        COMMAND_PAUSE: lambda: BotCommands.pause_command(voice_client),
-        COMMAND_RESUME: lambda: BotCommands.unpause_command(voice_client),
-        COMMAND_SKIP: lambda: BotCommands.skip_command(voice_client, message.guild.id),
-        COMMAND_STOP: lambda: BotCommands.stop_command(voice_client, message.guild),
-        COMMAND_DISCONNECT: lambda: BotCommands.disconnect_command(voice_client),
-        COMMAND_CLEAR: lambda: BotCommands.clear_command(voice_client),
+        COMMAND_PAUSE: lambda: BotCommands.pause_command(message),
+        COMMAND_RESUME: lambda: BotCommands.unpause_command(message),
+        COMMAND_SKIP: lambda: BotCommands.skip_command(message),
+        COMMAND_STOP: lambda: BotCommands.stop_command(message),
+        COMMAND_DISCONNECT: lambda: BotCommands.disconnect_command(message),
+        COMMAND_CLEAR: lambda: BotCommands.clear_command(message),
         COMMAND_INFO: lambda: BotCommands.info_command(message)
     }
 

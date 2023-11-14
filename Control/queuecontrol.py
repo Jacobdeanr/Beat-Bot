@@ -5,6 +5,7 @@ from downloadmanager import DownloadManager
 init(autoreset=True)
 
 class QueueControl:
+    current_songs = {}  # Dictionary to store current song for each guild
     song_queues = {}
     download_threshold = 5 # only download songs within this from the front.
 
@@ -21,8 +22,7 @@ class QueueControl:
             QueueControl.song_queues[guild_id] = [] 
 
         QueueControl.song_queues[guild_id].append(url)
-        print(f'\tSong added: added_song') 
-        print(f'\tQueue length is now {len(QueueControl.song_queues[guild_id])}')
+        print(f'\tSong added: {url}') 
         await QueueControl.trigger_event('song added', guild_id, url)
     
     @staticmethod
@@ -75,7 +75,6 @@ class QueueControl:
             return
 
         queue = QueueControl.song_queues[guild_id]
-        print(f'\tqueue length = {len(queue)}')
         for i in range(min(QueueControl.download_threshold, len(queue))):
             item = queue[i]
             if isinstance(item, str) and item.startswith("http"):  # Check if the item is a URL
@@ -86,7 +85,7 @@ class QueueControl:
                     QueueControl.song_queues[guild_id][i] = downloaded_file_path  # Update the URL with the file path in the queue
 
     @staticmethod
-    def clear(guild_id):
+    async def clear(guild_id):
         """
         Clears the song queue for a specified guild.
 
@@ -95,7 +94,8 @@ class QueueControl:
         print(Fore.LIGHTCYAN_EX + '\nQueueControl.clear()')
         if guild_id in QueueControl.song_queues:
             QueueControl.song_queues[guild_id] = []
-            print(f'\tqueue is now:{QueueControl.song_queues.get(guild_id)}')
+            await QueueControl.retrieve(guild_id)
+
     
     @staticmethod
     async def retrieve(guild_id):
@@ -107,6 +107,7 @@ class QueueControl:
         """
         print(Fore.LIGHTCYAN_EX + '\nQueueControl.retrieve()')
         queue = QueueControl.song_queues.get(guild_id)
+        print('\tQueue is now:')
         for song in queue:
-            print(f'\t{song}')
+            print(f'\t\t{song}')
         return QueueControl.song_queues.get(guild_id, [])
