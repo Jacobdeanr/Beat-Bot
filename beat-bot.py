@@ -15,6 +15,7 @@ COMMAND_STOP = '!stop'
 COMMAND_DISCONNECT = '!disconnect'
 COMMAND_CLEAR = '!clear'
 COMMAND_INFO = '!info'
+COMMAND_QUEUE = '!queue'
 
 #User Commands
 async def handle_command_prefix(message):
@@ -28,6 +29,7 @@ async def handle_command_prefix(message):
     """
     if message.content.startswith('!'):
         await handle_command(message)
+    return
 
 async def handle_command(message):
     """
@@ -50,7 +52,8 @@ async def handle_command(message):
         COMMAND_STOP: lambda: BotCommands.stop_command(message),
         COMMAND_DISCONNECT: lambda: BotCommands.disconnect_command(message),
         COMMAND_CLEAR: lambda: BotCommands.clear_command(message),
-        COMMAND_INFO: lambda: BotCommands.info_command(message)
+        COMMAND_INFO: lambda: BotCommands.info_command(message),
+        COMMAND_QUEUE: lambda: BotCommands.queue_command(message)
     }
 
     # Check if the author is in a voice channel
@@ -68,17 +71,20 @@ async def handle_command(message):
                 print(f"Error handling {command}: {e}")
                 #await message.channel.send(f"An error {e} occurred while processing the command: {command}")
             break
+    return
 
 @client.event
 async def on_ready():
     print(f"logged in as {client.user.name}")
     BotCommands.set_event_loop(asyncio.get_running_loop())
+    return
 
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
     await handle_command_prefix(message)
+    return
 
 @client.event
 async def on_voice_state_update(member, before, after):
@@ -87,6 +93,7 @@ async def on_voice_state_update(member, before, after):
         guild_id = before.channel.guild.id
         voice_client = discord.utils.get(client.voice_clients, guild=guild_id)
         lambda: BotCommands.disconnect_command(voice_client,guild_id)
+    return
 
 def read_token():
     with open('token.txt', 'r') as file:
