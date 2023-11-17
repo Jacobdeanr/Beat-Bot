@@ -25,7 +25,7 @@ class BotCommands:
         for video in video_urls:
             print(f'\tAdding {video} to {guild}')
             await QueueControl.add_song(guild_id, video)
-            await message.add_reaction("▶️")
+            await message.add_reaction("✅")
         
         next_song_queue = await QueueControl.retrieve(guild_id)
         
@@ -40,6 +40,7 @@ class BotCommands:
 
                 if song_path_to_play:
                     BotCommands.play_audio(voice_client, guild_id, song_path_to_play)
+        return
 
     @staticmethod
     async def pause_command(message):
@@ -48,7 +49,8 @@ class BotCommands:
         voice_client = guild.voice_client
         if voice_client and voice_client.is_playing():
             voice_client.pause()
-            await message.add_reaction("⏸️")
+            await message.add_reaction("✅")
+        return
 
     @staticmethod
     async def unpause_command(message):
@@ -58,7 +60,8 @@ class BotCommands:
 
         if voice_client and voice_client.is_paused():
             voice_client.resume()
-            await message.add_reaction("⏯️")
+            await message.add_reaction("✅")
+        return
     
     #call to the queuecontrol and remove the first song in the array.
     @staticmethod
@@ -70,9 +73,10 @@ class BotCommands:
         if voice_client and voice_client.is_playing():
             print('\tstopping audio')
             voice_client.stop()  # Because the queue auto plays the next song when it stops playing, we can just stop here.
-            await message.add_reaction("⏩")
+            await message.add_reaction("✅")
         else:
             print('Nothing playing')
+        return
     
     @staticmethod
     async def stop_command(message):
@@ -87,6 +91,7 @@ class BotCommands:
                 voice_client.stop()
             await message.add_reaction("🛑")
             await voice_client.disconnect()
+        return
 
     @staticmethod
     async def disconnect_command(message):
@@ -98,6 +103,7 @@ class BotCommands:
         if voice_client:
             await voice_client.disconnect()
             await message.add_reaction("😢")
+        return
 
     @staticmethod
     async def join_command(message):
@@ -107,6 +113,7 @@ class BotCommands:
         if voice_channel:
             await voice_channel.connect()
             await message.add_reaction("👋")
+        return
     
     async def clear_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.clear_command()')
@@ -116,7 +123,8 @@ class BotCommands:
 
         if voice_client.is_playing():
             voice_client.stop()
-            await message.add_reaction("🧹")
+            await message.add_reaction("💥")
+        return
     
     @staticmethod
     async def info_command(message):
@@ -131,6 +139,30 @@ class BotCommands:
             await message.channel.send(f"Currently playing: https://www.youtube.com/watch?v={video_id}")
         else:
             print(f'\tNo song is currently playing in guild {guild_id}.')
+        return
+
+    @staticmethod
+    async def queue_command(message):
+        print(Fore.LIGHTCYAN_EX + '\nBotCommands.info_queue()')
+        guild_id = message.guild.id
+        queue = await QueueControl.retrieve(guild_id)
+        queuelength = len(queue)
+        upcoming_songs = queue[:5]
+        message_parts = []
+        await message.add_reaction("✅")
+        if queuelength > 0:
+            for song_path in upcoming_songs:
+                song_id = BotCommands.extract_song_id(song_path)
+                url = f"https://www.youtube.com/watch?v={song_id}"
+                title = YouTubeDataHandler.fetch_video_title(url)
+                message_part = f"{title}" if title else f"Title not found for ({url})"
+                message_parts.append(message_part)
+
+            message_to_send = "\n".join(message_parts)
+            await message.channel.send(f'Songs in queue: **{queuelength}**\nNext song(s): \n{message_to_send}')
+        else:
+            await message.channel.send('Queue is empty!')
+        return
 
 #These should probably be in their own class. Helper functions for the various commands.
     @staticmethod
@@ -171,6 +203,7 @@ class BotCommands:
             QueueControl.current_songs[guild_id] = song_path_to_play # Place the popped song into the current_songs dictionary.
         except Exception as e:
             print(f"\tError playing audio in guild {guild_id}: {e}")
+        return
 
     @staticmethod
     def after_play(voice_client, guild_id):
@@ -179,6 +212,7 @@ class BotCommands:
         if not BotCommands._event_loop:
             BotCommands._event_loop = asyncio.get_event_loop()
         BotCommands._event_loop.create_task(BotCommands.play_next(voice_client, guild_id))
+        return
 
     @staticmethod
     async def play_next(voice_client, guild_id):
@@ -192,7 +226,8 @@ class BotCommands:
                 BotCommands.play_audio(voice_client, guild_id, next_song_path)
         else:
             print("\tQueue is empty. No song to play next.")
-        await voice_client.disconnect()
+            await voice_client.disconnect()
+        return
 
     def extract_song_id(file_path):
         base_name = os.path.basename(file_path)
@@ -202,3 +237,4 @@ class BotCommands:
     @staticmethod
     def set_event_loop(loop):
         BotCommands._event_loop = loop
+        return
