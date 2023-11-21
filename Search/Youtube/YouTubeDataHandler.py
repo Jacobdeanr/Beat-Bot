@@ -6,7 +6,7 @@ class YouTubeDataHandler:
 
 #move this into a different class
     @staticmethod
-    def validate_url(url):
+    async def validate_url(url):
         """
         Validates a YouTube URL and returns the standardized watch URL if successful.
 
@@ -21,7 +21,7 @@ class YouTubeDataHandler:
         
 #move this into a different class
     @staticmethod
-    def fetch_playlist_urls(playlist_url):
+    async def fetch_playlist_urls(playlist_url):
         """
         Fetches individual video URLs from a YouTube playlist URL.
 
@@ -38,7 +38,7 @@ class YouTubeDataHandler:
             return None
         
     @staticmethod
-    def fetch_video_length(url):
+    async def fetch_video_length(url):
         """
         Fetches the length of a YouTube video in seconds.
 
@@ -52,7 +52,7 @@ class YouTubeDataHandler:
             return None
     
     @staticmethod        
-    def fetch_video_title(url):
+    async def fetch_video_title(url):
         """
         Fetches the title of a YouTube video.
 
@@ -64,8 +64,9 @@ class YouTubeDataHandler:
             return video.title
         except Exception as e:
             return None
+    
     @staticmethod    
-    def fetch_video_uploader(url):
+    async def fetch_video_uploader(url):
         """
         Fetches the channel that uploaded a YouTube video.
 
@@ -78,8 +79,9 @@ class YouTubeDataHandler:
             return c.channel_name
         except Exception as e:
             return None
+    
     @staticmethod    
-    def fetch_video_id(url):
+    async def fetch_video_id(url):
         """
         Fetches the channel that uploaded a YouTube video.
 
@@ -91,3 +93,14 @@ class YouTubeDataHandler:
             return video.video_id
         except Exception as e:
             return None
+        
+    @staticmethod
+    async def fetch_video_data(url):
+        # Use pytube or similar library to fetch video data
+        video = YouTube(url)
+        return {
+            "uploader": video.author,
+            "title": video.title,
+            "length": video.length,
+            "id": video.video_id
+        }

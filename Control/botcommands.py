@@ -14,24 +14,25 @@ class BotCommands:
     @staticmethod
     async def play_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.play_command()')
-        guild = message.guild
-        guild_id = guild.id
-        voice_client = guild.voice_client   
-        voice_channel = message.author.voice.channel
-        
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
+       
         query = message.content.replace('!play', '').strip()
         video_urls = await BotCommands.process_song_request(query)
 
         for video in video_urls:
             print(f'\tAdding {video} to {guild}')
             await QueueControl.add_song(guild_id, video)
-            await message.add_reaction("✅")
+        await message.add_reaction("✅")
         
         next_song_queue = await QueueControl.retrieve(guild_id)
-        
+        #connect the voice client.
         if not voice_client: 
             print(f'\tConnecting to: {voice_channel}')
-            voice_client = await voice_channel.connect()
+            try:
+                voice_client = await voice_channel.connect()
+            except Exception as e:
+                print(f"\tError connecting to voice:{voice_channel}: {e}")
+            return
 
         if not voice_client.is_playing():
             if next_song_queue:
@@ -45,8 +46,7 @@ class BotCommands:
     @staticmethod
     async def pause_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.pause_command()')
-        guild = message.guild
-        voice_client = guild.voice_client
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
         if voice_client and voice_client.is_playing():
             voice_client.pause()
             await message.add_reaction("✅")
@@ -55,8 +55,7 @@ class BotCommands:
     @staticmethod
     async def unpause_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.unpause_command()')
-        guild = message.guild
-        voice_client = guild.voice_client   
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
 
         if voice_client and voice_client.is_paused():
             voice_client.resume()
@@ -67,8 +66,7 @@ class BotCommands:
     @staticmethod
     async def skip_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.skip_command()')
-        guild = message.guild
-        voice_client = guild.voice_client
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
 
         if voice_client and voice_client.is_playing():
             print('\tstopping audio')
@@ -81,9 +79,7 @@ class BotCommands:
     @staticmethod
     async def stop_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.stop_command()')
-        guild = message.guild
-        guild_id = guild.id
-        voice_client = guild.voice_client
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
 
         if voice_client:
             if voice_client.is_playing():
@@ -96,8 +92,7 @@ class BotCommands:
     @staticmethod
     async def disconnect_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.disconnect_command()')
-        guild_id = message.guild.id
-        voice_client = message.guild.voice_client   
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)  
     
         await QueueControl.clear(guild_id)
         if voice_client:
@@ -108,17 +103,17 @@ class BotCommands:
     @staticmethod
     async def join_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.join_command()') 
-        voice_channel = message.author.voice.channel
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
 
         if voice_channel:
             await voice_channel.connect()
             await message.add_reaction("👋")
         return
     
+    @staticmethod
     async def clear_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.clear_command()')
-        guild_id = message.guild.id
-        voice_client = message.guild.voice_client
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
         await QueueControl.clear(guild_id)     
 
         if voice_client.is_playing():
@@ -129,7 +124,7 @@ class BotCommands:
     @staticmethod
     async def info_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.info_command()')
-        guild_id = message.guild.id
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
         current_song = QueueControl.current_songs.get(guild_id)
 
         if current_song:
@@ -144,17 +139,18 @@ class BotCommands:
     @staticmethod
     async def queue_command(message):
         print(Fore.LIGHTCYAN_EX + '\nBotCommands.info_queue()')
-        guild_id = message.guild.id
+        guild, guild_id, voice_client,voice_channel = await BotCommands.get_guild_voice_client(message)
         queue = await QueueControl.retrieve(guild_id)
         queuelength = len(queue)
         upcoming_songs = queue[:5]
-        message_parts = []
-        await message.add_reaction("✅")
+
         if queuelength > 0:
+            message_parts = []
+            print(f'\tqueue length = {queuelength}')
             for song_path in upcoming_songs:
                 song_id = BotCommands.extract_song_id(song_path)
                 url = f"https://www.youtube.com/watch?v={song_id}"
-                title = YouTubeDataHandler.fetch_video_title(url)
+                title = await YouTubeDataHandler.fetch_video_title(url)
                 message_part = f"{title}" if title else f"Title not found for ({url})"
                 message_parts.append(message_part)
 
@@ -164,10 +160,19 @@ class BotCommands:
             await message.channel.send('Queue is empty!')
         return
 
-#These should probably be in their own class. Helper functions for the various commands.
+# Everything below this line should probably be in their own class. 
+# Helper functions for the various commands.
+    @staticmethod
+    async def get_guild_voice_client(message):
+        print(Fore.LIGHTCYAN_EX + '\nBotCommands.get_guild_voice_client()')
+        guild = message.guild
+        voice_client = guild.voice_client
+        voice_channel = message.author.voice.channel
+        return guild, guild.id, voice_client, voice_channel
+    
     @staticmethod
     async def process_song_request(query):
-        is_url = YouTubeDataHandler.validate_url(query)
+        is_url = await YouTubeDataHandler.validate_url(query)
 
         if is_url:
             url = query
@@ -182,8 +187,8 @@ class BotCommands:
             return []
 
         # Check if the URL is a playlist
-        if YouTubeURLHandler.is_playlist_url(url):
-            video_urls = YouTubeDataHandler.fetch_playlist_urls(url)
+        if(YouTubeURLHandler.is_playlist_url(url)):
+            video_urls = await YouTubeDataHandler.fetch_playlist_urls(url)
             return video_urls if video_urls else []
         else:
             return [url]       

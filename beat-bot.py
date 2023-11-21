@@ -42,6 +42,8 @@ async def handle_command(message):
     """
     content = message.content
     text = content.lower()
+    guild = message.guild
+    voice_channel = message.author.voice.channel
 
     # Command-function mapping
     commands = {
@@ -66,6 +68,7 @@ async def handle_command(message):
             try:
                 print(Fore.LIGHTCYAN_EX + '\n-------- New Command --------')
                 print(f'\t{content}')
+                print(f'\tguild = {guild}\n\tvoice_channel = {voice_channel}')
                 await func()
             except Exception as e:
                 print(f"Error handling {command}: {e}")

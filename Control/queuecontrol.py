@@ -1,5 +1,5 @@
 from colorama import init, Fore, Back, Style
-from downloadmanager import DownloadManager
+from Search.Youtube import YouTubeDownload
 
 # Initialize Colorama
 init(autoreset=True)
@@ -79,7 +79,7 @@ class QueueControl:
             item = queue[i]
             if isinstance(item, str) and item.startswith("http"):  # Check if the item is a URL
                 # It's a URL, initiate download
-                downloaded_file_path = await DownloadManager.download_audio(item)
+                downloaded_file_path = await YouTubeDownload.download_audio(item)
                 if downloaded_file_path:
                     print(f'\tPlacing {downloaded_file_path} in {i} for {guild_id}')
                     QueueControl.song_queues[guild_id][i] = downloaded_file_path  # Update the URL with the file path in the queue
