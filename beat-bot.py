@@ -1,11 +1,12 @@
 import discord
 import asyncio
-from botcommands import BotCommands
-from colorama import Fore, Back, Style
+from Control.botcommands import BotCommands
+from colorama import init, Fore, Back, Style
 
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
+init(autoreset=True)
 
 COMMAND_PLAY = '!play'
 COMMAND_PAUSE = '!pause'

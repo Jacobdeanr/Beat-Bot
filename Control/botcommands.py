@@ -5,8 +5,7 @@ from Search.Youtube.YouTubeSearchHandler import YouTubeSearchHandler
 from Search.Youtube.YouTubeURLHandler import YouTubeURLHandler
 from Search.Youtube.YouTubeDataHandler import YouTubeDataHandler
 from Control.queuecontrol import QueueControl
-from discord import VoiceChannel, TextChannel
-from colorama import Fore, Back, Style
+from colorama import Fore
 
 class BotCommands:
     _event_loop = None
@@ -32,7 +31,7 @@ class BotCommands:
                 voice_client = await voice_channel.connect()
             except Exception as e:
                 print(f"\tError connecting to voice:{voice_channel}: {e}")
-            return
+                return
 
         if not voice_client.is_playing():
             if next_song_queue:
@@ -50,6 +49,8 @@ class BotCommands:
         if voice_client and voice_client.is_playing():
             voice_client.pause()
             await message.add_reaction("✅")
+        else:
+            await message.add_reaction("❌")
         return
 
     @staticmethod
@@ -74,6 +75,7 @@ class BotCommands:
             await message.add_reaction("✅")
         else:
             print('Nothing playing')
+            await message.add_reaction("❌")
         return
     
     @staticmethod

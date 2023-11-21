@@ -1,4 +1,5 @@
 import re
+from colorama import Fore
 
 class YouTubeURLHandler:
     # Compiled regular expression to match YouTube URLs
@@ -16,9 +17,9 @@ class YouTubeURLHandler:
         :param query: The query string which may contain a YouTube URL.
         :return: True if the query is a valid YouTube URL, False otherwise.
         """
-        print(f'YouTubeURLHandler checking {query}')
+        print(Fore.LIGHTCYAN_EX + '\nYouTubeURLHandler.validate_url()')
         match = YouTubeURLHandler.youtube_url_pattern.match(query)
-        print(f'{query} = {match}')
+        print(f'\t{query} = {match}')
         return bool(match)
 
     @staticmethod
@@ -31,4 +32,6 @@ class YouTubeURLHandler:
         :param url: The YouTube URL to check.
         :return: True if the URL is a playlist URL, False otherwise.
         """
+        print(Fore.LIGHTCYAN_EX + '\nYouTubeURLHandler.is_playlist_url()')
+        print(f'\t {"list=" in url}')
         return "list=" in url

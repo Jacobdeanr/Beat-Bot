@@ -1,8 +1,5 @@
-from colorama import init, Fore, Back, Style
-from Search.Youtube import YouTubeDownload
-
-# Initialize Colorama
-init(autoreset=True)
+from colorama import Fore
+from Search.Youtube.YouTubeDownload import YouTubeDownload
 
 class QueueControl:
     current_songs = {}  # Dictionary to store current song for each guild
@@ -63,6 +60,7 @@ class QueueControl:
             await QueueControl.handle_queue_update(guild_id)
     
     # We are doing this so we only download the first few songs that are ready to play, then when we move items up in the queue we download the next.
+    # This is the only thing tightly coupled to YouTube for now. We'll need to make a machine for dependency injection at some point.
     @staticmethod
     async def handle_queue_update(guild_id):
         """
@@ -81,7 +79,7 @@ class QueueControl:
                 # It's a URL, initiate download
                 downloaded_file_path = await YouTubeDownload.download_audio(item)
                 if downloaded_file_path:
-                    print(f'\tPlacing {downloaded_file_path} in {i} for {guild_id}')
+                    print(f'\tPlacing {downloaded_file_path} in position {i} for {guild_id}')
                     QueueControl.song_queues[guild_id][i] = downloaded_file_path  # Update the URL with the file path in the queue
 
     @staticmethod
