@@ -4,10 +4,11 @@ from colorama import Fore
 
 from Search.Youtube.YouTubeDataHandler import YouTubeDataHandler
 from util.FileSearch import FileSearch
+from config import DOWNLOAD_FOLDER, VIDEO_MAX_LENGTH
 
 # Need to make a config or env variable for this.
-download_folder = "C:\\test\\"
-video_max_length = 10800  # maximum length of a video in seconds.
+download_folder = DOWNLOAD_FOLDER
+video_max_length = VIDEO_MAX_LENGTH  # maximum length of a video in seconds.
 
 class YouTubeDownload:
     currently_downloading = set()
@@ -74,7 +75,7 @@ class YouTubeDownload:
         return None
 
     @staticmethod
-    async def download_audio(url):
+    async def download_audio(url, video_id):
         """
         Manages the process of downloading audio from a YouTube URL.
 
@@ -82,14 +83,14 @@ class YouTubeDownload:
         and if its length exceeds the maximum limit before initiating the download.
 
         :param url: The YouTube URL to download audio from.
+        :param video_id: The video ID of the YouTube video.
         :return: The file path of the downloaded audio file if successful, None otherwise.
         """
         print(Fore.LIGHTCYAN_EX + '\nYouTubeDownload.download_audio()')
         if await YouTubeDownload.is_downloading(url):
-            print('\t Already Downloading.')
+            print('\t Already Downloading.')    
             return None
 
-        video_id = await YouTubeDataHandler.fetch_video_id(url)
         print(f'\t{video_id}')
         existing_file = await YouTubeDownload.find_file(video_id)
         if existing_file:

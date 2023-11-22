@@ -114,9 +114,14 @@ class YouTubeDataHandler:
         """
         print(Fore.LIGHTCYAN_EX + '\nYouTubeDataHandler.fetch_video_data()')
         video = YouTube(url)
+        c = Channel(video.channel_url)
         return {
             "uploader": video.author,
             "title": video.title,
             "length": video.length,
-            "id": video.video_id
+            "id": video.video_id,
+            "publish_date": video.publish_date,
+            "channel_id": c.channel_id,
+            "channel_name": c.channel_name,
+            "url": url,
         }
