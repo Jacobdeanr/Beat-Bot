@@ -5,7 +5,7 @@ from colorama import Fore
 class FileSearch:
 
     @staticmethod
-    def find_existing_file(path, filename):
+    def find_existing_file(path, stem):
         """
         Searches for an existing downloaded file with the given video ID.
 
@@ -13,6 +13,6 @@ class FileSearch:
         :return: Path to the existing file if found, None otherwise
         """
         print(Fore.LIGHTCYAN_EX + '\nUtil.FileSearch.find_existing_file()')
-        pattern = os.path.join(path, f"{filename}.*")
+        pattern = os.path.join(path, f"{stem}.*")
         files = glob.glob(pattern)
         return files[0] if files else None

@@ -2,7 +2,7 @@ from youtube_search import YoutubeSearch
 
 class YouTubeSearchHandler:
     @staticmethod
-    async def search(query):
+    async def search_for_one_song(query: str) -> str:
         """
         Searches YouTube for the given query and returns the URL of the top result.
 
