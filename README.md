@@ -18,4 +18,4 @@ pip install pynacl
 
 ### Configuration
 
-Video download location, and max video length is configured in ```downloadmanager.py``` file.
+Video download location, and max video length is configured in ```Search\YouTube\YouTubeDownload.py``` file.
