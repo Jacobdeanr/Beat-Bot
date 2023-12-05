@@ -39,7 +39,6 @@ class SongInfo:
             f"  full_path='{self.full_path}'\n"
             ")"
         )
-
     #Example of how to call this:
     # song = SongInfo(uploader="John Doe", title="Old Title", length=300)
     # song.update_song_info(title="New Title", length=350)
@@ -47,4 +46,3 @@ class SongInfo:
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-

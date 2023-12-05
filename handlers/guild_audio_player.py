@@ -1,6 +1,6 @@
 import discord
 from colorama import Fore
-from handlers.song_info import SongInfo
+from models.song_info import SongInfo
 
 class GuildAudioPlayer:
     def __init__(self, guild_id: int, after_play_callback):
@@ -39,7 +39,6 @@ class GuildAudioPlayer:
         print(Fore.LIGHTCYAN_EX + 'GuildAudioPlayer.play_audio()')
         if self.voice_client and not self.voice_client.is_playing():
             try:
-                print(f'\tNow playing: {song_info.full_path}')
                 source = discord.FFmpegPCMAudio(song_info.full_path, executable="ffmpeg")
                 self.voice_client.play(source, after=lambda e: self.after_play())
             except Exception as e:

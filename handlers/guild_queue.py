@@ -1,10 +1,10 @@
 from colorama import Fore
-from handlers.song_info import SongInfo
+from models.song_info import SongInfo
 
 class GuildQueue:
-    def __init__(self, guild_id):
-        self.queue = []
-        self.current_song: SongInfo = None
+    def __init__(self):
+        self.queue:list = []
+        self.current_song: SongInfo = SongInfo()
 
     def __str__(self):
         queue_str = ", ".join(str(song) for song in self.queue)
@@ -36,6 +36,10 @@ class GuildQueue:
         print(Fore.LIGHTCYAN_EX+'GuildQueue.get_current_song()')
         return self.current_song
     
-    def set_current_song(self, song_info) -> None:
-        print(Fore.LIGHTCYAN_EX+'GuildQueue.set_current_song()')
+    def set_current_song(self, song_info:SongInfo) -> None:
         self.current_song = song_info
+        print(Fore.LIGHTCYAN_EX + f'GuildQueue.set_current_song()\n{song_info}')
+
+    def clear_current_song(self) -> None:
+        print(Fore.LIGHTCYAN_EX + f'GuildQueue.clear_current_song()')
+        self.current_song = []

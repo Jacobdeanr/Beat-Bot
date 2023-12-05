@@ -3,9 +3,10 @@ import discord
 from colorama import Fore
 from commands.base_command import BaseCommand
 
-from handlers.youtube.youtube_data_handler import YouTubeDataHandler
-from handlers.youtube.youtube_search_handler import YouTubeSearchHandler
-from handlers.youtube.youtube_url_handler import YouTubeURLHandler
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from bot.beat_bot import BeatBot
+    from factories.audio_service import AudioServiceFactory
 
 from enum import Enum, auto
 
@@ -15,56 +16,44 @@ class ErrorType(Enum):
     WRONG_VOICE_CHANNEL = auto()
 
 class PlayCommand(BaseCommand):
-    def __init__(self, beatbot):
+    def __init__(self, beatbot: 'BeatBot'):
         super().__init__(beatbot)
-        self.beatbot = beatbot
-        self.song_data_handler = YouTubeDataHandler()
-        self.search_handler = YouTubeSearchHandler()
-        self.guild_id = None
+        self.audio_service_factory: 'AudioServiceFactory' = beatbot.audio_service_factory
 
     async def execute(self, message: discord.Message) -> None:
-        self.log_execution()
-        self.guild_id = message.guild.id
+        print(Fore.LIGHTCYAN_EX + '\nPlayCommand.execute()')
+        guild_id = message.guild.id
 
         author_voice_channel = message.author.voice.channel if message.author.voice else None
         if not author_voice_channel:
             await self.handle_error(message, ErrorType.WRONG_VOICE_CHANNEL)
             return
 
-        if not self.guild_audio_player_manager.is_player_in_correct_channel(self.guild_id, author_voice_channel):
-            if not await self.guild_audio_player_manager.connect_player_to_channel(self.guild_id, author_voice_channel):
+        if not self.guild_audio_player_manager.is_player_in_correct_channel(guild_id, author_voice_channel):
+            if not await self.guild_audio_player_manager.connect_player_to_channel(guild_id, author_voice_channel):
                 await self.handle_error(message, ErrorType.CONNECTION_ISSUE)
                 return
 
-        video_list = await self.process_song_request(message)
+        video_list = self.process_song_request(message)
         if not video_list:
             await self.handle_error(message, ErrorType.NO_SONG_FOUND)
             return
 
         await self.add_songs_to_queue(video_list, message)
-        await self.guild_audio_player_manager.play_audio_if_not_playing(self.guild_id)
+        await self.guild_audio_player_manager.play_audio_if_not_playing(guild_id)
 
-
-    def log_execution(self):
-        print(Fore.LIGHTCYAN_EX + '\nPlayCommand.execute()')
-
-    async def process_song_request(self, message: discord.Message) -> list:
+    def process_song_request(self, message: discord.Message) -> list:
+        print(Fore.LIGHTCYAN_EX + '\nPlayCommand.process_song_request()')
         query = message.content.replace('!play', '').strip()
-        watch_url: str = await self.song_data_handler.validate_url(query)
 
-        if not watch_url:
-            query: str = await self.search_handler.search_for_one_song(query)
-        if query:
-            if YouTubeURLHandler.is_playlist_url(query):
-                # Process as playlist URL
-                return await self.song_data_handler.get_playlist_video_urls(query)
-            else:
-                # Process as single song URL
-                return [query]
-        return []
+        audio_service = self.audio_service_factory.get_service(query)
+        if not audio_service:
+            audio_service = self.audio_service_factory.get_default_service()
+
+        return audio_service.search_song(query)
 
     async def add_songs_to_queue(self, video_list: list, message: discord.Message):
-        await self.guild_queue_manager.add_songs_bulk(self.guild_id, video_list)
+        self.guild_queue_manager.add_songs_bulk(message.guild.id, video_list)
         await message.add_reaction("✅")
 
     async def handle_error(self, message: discord.Message, error_type: ErrorType):
